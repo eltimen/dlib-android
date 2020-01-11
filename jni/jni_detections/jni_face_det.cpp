@@ -147,6 +147,25 @@ JNIEXPORT jobjectArray JNICALL
   return getDetectResult(env, detPtr, size);
 }
 
+JNIEXPORT jobjectArray JNICALL
+DLIB_FACE_JNI_METHOD(jniMatDetect)(JNIEnv* env, jobject thiz,
+                                   long matAddr) {
+	LOG(INFO) << "jniMatFaceDet";
+	// TODO DLIB_ASSERT The format of mat should be BGR or Gray
+	cv::Mat* mat = (cv::Mat*)matAddr;
+	DetectorPtr detPtr = getDetectorPtr(env, thiz);
+	jint size;
+	if (mat->channels() == 1) {
+		cv::Mat bgrMat;
+		cv::cvtColor(*mat, bgrMat, CV_GRAY2BGR); 
+		size = detPtr->det(bgrMat);
+	} else {
+		size = detPtr->det(*mat);
+	}
+	LOG(INFO) << "det face size: " << size;
+	return getDetectResult(env, detPtr, size);
+}
+
 jint JNIEXPORT JNICALL DLIB_FACE_JNI_METHOD(jniInit)(JNIEnv* env, jobject thiz,
                                                      jstring jLandmarkPath) {
   LOG(INFO) << "jniInit";
